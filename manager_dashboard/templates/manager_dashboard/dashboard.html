@@ -1,0 +1,300 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard Manager - SportGateway{% endblock %}
+
+{% block manager_content %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+<div class="dashboard-profile-image" style="margin-top:10px; margin-bottom:10px;">
+    {% if user.profile_image %}
+        <img src="{{ user.profile_image.url }}" alt="Foto Profil" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #ddd;">
+    {% else %}
+        <img src="{% static 'default.jpg' %}" alt="Default Foto Profil" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #ddd;">
+    {% endif %}
+</div>
+    </div>
+    
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Pendapatan Bulan Ini -->
+        <div class="col-12 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Pendapatan (Bulan Ini)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Rp {{ monthly_income|default:0|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Booking Bulan Ini -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Booking (Bulan Ini)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ monthly_bookings|default:0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Booking Pending -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Booking Pending</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ booking_status.pending|default:0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- End of Content Row -->
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Area Chart -->
+    <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Pendapatan 12 Bulan Terakhir</h6>
+            </div>
+            <div class="card-body">
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+    <canvas id="revenueChart"></canvas>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <!-- Pie Chart Status Booking -->
+    <div class="col-12 col-lg-6 mb-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Booking per Bulan</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+    {% if monthly_booking_counts and monthly_labels and monthly_booking_counts|length > 0 %}
+        <canvas id="bookingBarChart"></canvas>
+    {% else %}
+        <div class="text-center py-5">Belum ada data booking per bulan.</div>
+    {% endif %}
+</div>
+        </div>
+    </div>
+</div>
+<div class="col-12 col-lg-6 mb-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Status Booking</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-pie pt-4 pb-2">
+                <canvas id="bookingStatusChart"></canvas>
+            </div>
+            <div class="mt-4 text-center small">
+                <span class="mr-2">
+                    <i class="fas fa-circle text-success"></i> Sukses
+                </span>
+                <span class="mr-2">
+                    <i class="fas fa-circle text-warning"></i> Pending
+                </span>
+                <span class="mr-2">
+                    <i class="fas fa-circle text-danger"></i> Batal
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Booking Terbaru -->
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Booking Terbaru</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Kode Booking</th>
+                                <th>Lapangan</th>
+                                <th>Tanggal</th>
+                                <th>Waktu</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings %}
+                            <tr>
+                                <td>
+    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailBookingModal{{ booking.id }}">Detail</button>
+    <!-- Modal Detail Booking -->
+    <div class="modal fade" id="detailBookingModal{{ booking.id }}" tabindex="-1" role="dialog" aria-labelledby="detailBookingLabel{{ booking.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered w-100" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailBookingLabel{{ booking.id }}">Detail Booking</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group list-group-flush">
+              
+              <li class="list-group-item"><strong>Nama Lapangan:</strong> {{ booking.field.name }}</li>
+              <li class="list-group-item"><strong>Tanggal:</strong> {{ booking.date|date:"d M Y" }}</li>
+              <li class="list-group-item"><strong>Jam:</strong> {{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</li>
+              <li class="list-group-item"><strong>Total Harga:</strong> Rp {{ booking.total_price|intcomma }}</li>
+              <li class="list-group-item"><strong>Status:</strong> {% if booking.is_cancelled %}Dibatalkan{% elif booking.is_paid %}Selesai{% else %}Menunggu{% endif %}</li>
+              <li class="list-group-item"><strong>Pemesan:</strong> {{ booking.user.get_full_name|default:booking.user.username }}</li>
+              
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+</td>
+                                <td>{{ booking.field.name }}</td>
+                                <td>{{ booking.date|date:"d M Y" }}</td>
+                                <td>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</td>
+                                <td>
+    {% if booking.is_cancelled %}
+        <span class="badge badge-danger">Dibatalkan</span>
+    {% elif booking.is_paid %}
+        <span class="badge badge-success">Selesai</span>
+    {% else %}
+        <span class="badge badge-warning">Menunggu</span>
+    {% endif %}
+</td>
+                                <td>Rp {{ booking.total_price|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Tidak ada data booking</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<!-- Page level plugins -->
+<script src="{% static 'sb-admin-2/vendor/chart.js/Chart.min.js' %}"></script>
+<script>
+    // Data dari context
+    const monthlyRevenue = {{ monthly_revenue|default:"[]"|safe }};
+    const monthlyLabels = {{ monthly_labels|default:"[]"|safe }};
+    const bookingBarData = {{ monthly_booking_counts|default:"[]"|safe }};
+    const bookingStatus = {
+        success: {{ booking_status.success|default:0 }},
+        pending: {{ booking_status.pending|default:0 }},
+        cancelled: {{ booking_status.cancelled|default:0 }}
+    };
+    // Chart Pendapatan
+    if (document.getElementById('revenueChart')) {
+        new Chart(document.getElementById('revenueChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Pendapatan',
+                    data: monthlyRevenue,
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    // Chart Booking per Bulan
+    if (document.getElementById('bookingBarChart')) {
+        new Chart(document.getElementById('bookingBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Total Booking',
+                    data: bookingBarData,
+                    backgroundColor: '#1cc88a',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    // Pie Chart Status Booking
+    if (document.getElementById('bookingStatusChart')) {
+        new Chart(document.getElementById('bookingStatusChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Sukses', 'Pending', 'Batal'],
+                datasets: [{
+                    data: [bookingStatus.success, bookingStatus.pending, bookingStatus.cancelled],
+                    backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'],
+                }]
+            },
+            options: {
+                plugins: { legend: { display: true, position: 'bottom' } },
+                responsive: true
+            }
+        });
+    }
+</script>
+{% endblock %}

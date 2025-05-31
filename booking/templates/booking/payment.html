@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Simulasi Pembayaran{% endblock %}
+{% block content %}
+
+<h2>Simulasi Pembayaran</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Lapangan:</strong> {{ booking.field.name }}</p>
+        <p><strong>Tanggal:</strong> {{ booking.date }}</p>
+        <p><strong>Waktu:</strong> {{ booking.start_time }} - {{ booking.end_time }}</p>
+        <p><strong>Status:</strong> 
+            {% if booking.is_paid %}
+                <span class="badge bg-success">Sudah Dibayar</span>
+            {% else %}
+                <span class="badge bg-warning text-dark">Belum Dibayar</span>
+            {% endif %}
+        </p>
+
+        {% if not booking.is_paid %}
+        <form method="post">
+            {% csrf_token %}
+            <p><strong>Pilih Metode Pembayaran:</strong></p>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="metode" checked>
+                <label class="form-check-label">Transfer Bank</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="metode">
+                <label class="form-check-label">QRIS</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="metode">
+                <label class="form-check-label">Bayar di Tempat</label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Simulasikan Pembayaran</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{% url 'booking:index' %}" class="btn btn-link mt-3">← Kembali ke daftar lapangan</a>
+
+{% endblock %}

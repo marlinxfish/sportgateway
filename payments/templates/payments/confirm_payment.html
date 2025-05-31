@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Konfirmasi Pembayaran</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if payment.payment_status == 'completed' %}
+                        <div class="text-center py-4">
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                            </div>
+                            <h3>Pembayaran Berhasil Dikonfirmasi!</h3>
+                            <p class="lead">Terima kasih telah melakukan pembayaran.</p>
+                            <div class="alert alert-success">
+                                <p class="mb-1">Kode Booking: <strong>{{ payment.booking.code }}</strong></p>
+                                <p class="mb-1">Jumlah: <strong>Rp {{ payment.amount|floatformat:0 }}</strong></p>
+                                <p class="mb-1">Status: <span class="badge bg-success">Lunas</span></p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h5>Detail Booking</h5>
+                                        <hr>
+                                        <p class="mb-2">
+                                            <strong>Lapangan:</strong><br>
+                                            {{ payment.booking.field.name }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Tanggal:</strong><br>
+                                            {{ payment.booking.date|date:"l, d F Y" }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Waktu:</strong><br>
+                                            {{ payment.booking.start_time|time:"H:i" }} - {{ payment.booking.end_time|time:"H:i" }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>Total Pembayaran:</strong><br>
+                                            <span class="h5 text-primary">Rp {{ payment.amount|floatformat:0 }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5>Konfirmasi Pembayaran</h5>
+                                        <hr>
+                                        <p>Masukkan nomor Virtual Account (VA) yang Anda dapatkan saat memilih metode pembayaran.</p>
+                                        
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <div class="mb-3">
+                                                <label for="payment_code" class="form-label">Nomor Virtual Account</label>
+                                                <input type="text" class="form-control form-control-lg" 
+                                                       id="payment_code" name="payment_code" 
+                                                       placeholder="Contoh: {{ payment.virtual_account }}" required
+                                                       {% if payment.payment_status == 'completed' %}disabled{% endif %}>
+                                                <div class="form-text">Masukkan nomor VA yang Anda dapatkan</div>
+                                            </div>
+                                            
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary btn-lg">
+                                                    <i class="fas fa-check-circle me-2"></i>Konfirmasi Pembayaran
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'payments:instruction' code=payment.code %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Kembali ke Instruksi
+                        </a>
+                        <a href="{% url 'booking:my_bookings' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>Lihat Riwayat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

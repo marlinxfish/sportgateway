@@ -1,0 +1,37 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+
+{% block title %}Hapus Lapangan - SportGateway{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Hapus Lapangan</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Konfirmasi Penghapusan</h6>
+            </div>
+            <div class="card-body">
+                <p>Apakah Anda yakin ingin menghapus lapangan <strong>{{ field.name }}</strong>?</p>
+                <p class="text-danger">Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'fields:manager_field_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Batal
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

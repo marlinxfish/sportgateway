@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SportGateway{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h1 class="h3 mb-4">{{ title }}</h1>
+                    <p class="lead">{{ message }}</p>
+                    
+                    <div class="mt-5">
+                        <a href="{{ redirect_url }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>{{ redirect_text }}
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p class="text-muted">Anda akan diarahkan secara otomatis dalam <span id="countdown">10</span> detik</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Countdown timer
+let seconds = 10;
+const countdownElement = document.getElementById('countdown');
+
+const countdown = setInterval(() => {
+    seconds--;
+    countdownElement.textContent = seconds;
+    
+    if (seconds <= 0) {
+        clearInterval(countdown);
+        window.location.href = '{{ redirect_url }}';
+    }
+}, 1000);
+</script>
+{% endblock %}

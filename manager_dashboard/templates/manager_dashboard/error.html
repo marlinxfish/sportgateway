@@ -1,0 +1,20 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% block title %}Terjadi Kesalahan{% endblock %}
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger shadow">
+                <div class="card-body text-center">
+                    <h1 class="display-4 text-danger mb-4">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </h1>
+                    <h2 class="mb-3">Terjadi Kesalahan</h2>
+                    <p class="lead">{{ error_message|default:"Maaf, terjadi kesalahan tak terduga." }}</p>
+                    <a href="/" class="btn btn-primary mt-3">Kembali ke Beranda</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

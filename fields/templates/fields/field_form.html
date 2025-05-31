@@ -1,0 +1,320 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Tambah{% endif %} Lapangan - SportGateway{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'vendor/select2/css/select2.min.css' %}" rel="stylesheet">
+<link href="{% static 'vendor/select2-bootstrap-5-theme/select2-bootstrap-5-theme.min.css' %}" rel="stylesheet">
+<style>
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        margin-top: 10px;
+        display: none;
+    }
+    .image-upload-container {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .image-upload-container:hover {
+        border-color: #4e73df;
+        background-color: #f8f9fc;
+    }
+    .image-upload-container i {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #6c757d;
+    }
+    .map-container {
+        height: 300px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    #map {
+        width: 100%;
+        height: 100%;
+    }
+    .location-buttons {
+        margin-top: 1rem;
+    }
+    .form-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .required-field::after {
+        content: " *";
+        color: #e74a3b;
+    }
+</style>
+{% endblock %}
+
+{% block manager_content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'manager_dashboard:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'fields:manager_field_list' %}">Lapangan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
+    {% if form.instance.pk %}Edit{% else %}Tambah{% endif %} Lapangan
+</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">
+                {% if form.instance.pk %}
+                    <i class="fas fa-edit me-2"></i>Edit Lapangan
+                {% else %}
+                    <i class="fas fa-plus-circle me-2"></i>Tambah Lapangan Baru
+                {% endif %}
+            </h1>
+        </div>
+        <div>
+            <a href="{% url 'fields:manager_field_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Kembali
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <div>
+                        <strong>Terjadi kesalahan!</strong> Mohon periksa kembali form di bawah.
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="fieldForm" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <!-- Informasi Dasar -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle me-2"></i>Informasi Dasar
+                    </h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label fw-bold required-field pb-2">Nama Lapangan</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="small text-muted">Contoh: Lapangan Futsal A, Lapangan Badminton Utama</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label required-field">Kategori</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.category.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.address.id_for_label }}" class="form-label fw-bold required-field pb-2">Alamat Lengkap</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.address.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.price_per_hour.id_for_label }}" class="form-label fw-bold required-field pb-2">Harga per Jam (Rp)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    {{ form.price_per_hour }}
+                                </div>
+                                {% if form.price_per_hour.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.price_per_hour.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="small text-muted">Harga sewa per jam dalam Rupiah</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold pb-2">Status</label>
+                                <div class="form-check form-switch">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        Aktifkan Lapangan
+                                    </label>
+                                </div>
+                                <div class="small text-muted">Nonaktifkan untuk menyembunyikan lapangan dari daftar booking</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foto Lapangan -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-camera me-2"></i>Foto Lapangan
+                    </h2>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <input type="file" name="image" id="id_image" class="d-none" accept="image/*">
+                                <label for="id_image" class="image-upload-container w-100">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p class="mb-0">Klik untuk mengunggah foto</p>
+                                    <small class="text-muted">Format: JPG, PNG, atau WEBP (maks. 2MB)</small>
+                                </label>
+                                {% if form.image.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.image.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <img id="imagePreview" src="{% if form.instance.image %}{{ form.instance.image.url }}{% endif %}" 
+                                     class="img-fluid mt-2 rounded image-preview {% if not form.instance.image %}d-none{% endif %}" 
+                                     alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lokasi -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>Lokasi
+                    </h2>
+                    <div class="form-group mb-3">
+                        <div class="map-container mb-2">
+    <div id="map"></div>
+</div>
+<div class="d-flex align-items-center mb-2">
+    <span class="badge bg-light text-dark me-2"><i class="fas fa-map-marker-alt"></i> Koordinat:</span>
+    <span id="lat" class="fw-bold text-primary">-</span>, <span id="lng" class="fw-bold text-primary">-</span>
+</div>
+<div class="location-buttons mb-2">
+    <button type="button" id="locateMeBtn" class="btn btn-sm btn-outline-primary me-2">
+        <i class="fas fa-location-arrow me-1"></i>Dapatkan Lokasi Saya
+    </button>
+    <small class="text-muted">Klik atau geser pin untuk mengatur lokasi</small>
+</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.latitude.id_for_label }}" class="form-label fw-bold required-field pb-2">Garis Lintang (Latitude)</label>
+                                {{ form.latitude }}
+                                {% if form.latitude.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.latitude.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.longitude.id_for_label }}" class="form-label fw-bold required-field pb-2">Garis Bujur (Longitude)</label>
+                                {{ form.longitude }}
+                                {% if form.longitude.errors %}
+                                    <div class="small text-danger">
+                                        {{ form.longitude.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.instance.pk %}
+<div class="mb-3">
+    <a href="{% url 'fields:manage_closures' form.instance.pk %}" class="btn btn-outline-danger">
+        <i class="fas fa-calendar-times"></i> Kelola Jadwal Penutupan
+    </a>
+</div>
+{% endif %}
+<div class="d-flex justify-content-between">
+    <a href="{% url 'fields:manager_field_list' %}" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Batal
+    </a>
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Simpan
+    </button>
+</div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Inisialisasi peta dengan nilai default atau dari form
+    var initialLat = parseFloat(document.getElementById('id_latitude').value) || -6.2;
+    var initialLng = parseFloat(document.getElementById('id_longitude').value) || 106.8;
+    
+    var map = L.map('map').setView([initialLat, initialLng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Tambahkan marker dengan posisi awal
+    var marker = L.marker([initialLat, initialLng], { 
+        draggable: true 
+    }).addTo(map);
+
+    // Fungsi untuk memperbarui input koordinat
+    function updateInputs(lat, lng) {
+        document.getElementById('id_latitude').value = lat.toFixed(6);
+        document.getElementById('id_longitude').value = lng.toFixed(6);
+        document.getElementById('lat').textContent = lat.toFixed(6);
+        document.getElementById('lng').textContent = lng.toFixed(6);
+    }
+
+    // Event saat peta diklik
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        updateInputs(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Event saat marker digeser
+    marker.on('dragend', function(e) {
+        var latlng = e.target.getLatLng();
+        updateInputs(latlng.lat, latlng.lng);
+    });
+
+    // Inisialisasi nilai koordinat
+    updateInputs(initialLat, initialLng);
+</script>
+{% endblock %}

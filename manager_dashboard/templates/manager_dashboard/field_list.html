@@ -1,0 +1,40 @@
+{% extends 'manager_dashboard/base.html' %}
+{% block title %}Kelola Lapangan{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">Lapangan yang Anda Kelola</h2>
+
+{% if fields %}
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for field in fields %}
+    <div class="col">
+        <div class="card h-100">
+            {% if field.image %}
+                <img src="{{ field.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+            {% else %}
+                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span>Tidak Ada Gambar</span>
+                </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ field.name }}</h5>
+                <p class="card-text">
+                    <strong>Kategori:</strong> {{ field.category }}<br>
+                    <strong>Harga per jam:</strong> Rp{{ field.price_per_hour|floatformat:0 }}
+                </p>
+                <a href="{% url 'fields:field_edit' field.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'fields:edit_operational_hours' field.pk %}" class="btn btn-sm btn-outline-secondary">
+                    Jam Operasional
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    Belum ada lapangan yang Anda kelola.
+</div>
+{% endif %}
+
+{% endblock %}

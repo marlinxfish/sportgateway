@@ -1,0 +1,17 @@
+{% extends 'manager_dashboard/base.html' %}
+{% block content %}
+<h2>Lapangan Saya</h2>
+<ul>
+    {% for field in fields %}
+        <li>
+            <strong>{{ field.name }}</strong> - Rp{{ field.price_per_hour }}<br>
+            <a href="{% url 'field_edit' field.pk %}">Edit</a>
+            <a href="{% url 'edit_operational_hours' field.pk %}" class="btn btn-sm btn-outline-secondary">
+                Jam Operasional
+              </a>              
+        </li>
+    {% empty %}
+        <li>Belum ada lapangan</li>
+    {% endfor %}
+</ul>
+{% endblock %}

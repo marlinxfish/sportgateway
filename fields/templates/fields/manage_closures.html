@@ -1,0 +1,81 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+
+{% block title %}Kelola Jadwal Penutupan - SportGateway{% endblock %}
+
+{% block extra_css %}
+<style>
+    .closure-table th, .closure-table td { vertical-align: middle; }
+</style>
+{% endblock %}
+
+{% block manager_content %}
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 mb-0"><i class="fas fa-calendar-times me-2"></i>Kelola Jadwal Penutupan Lapangan</h1>
+        <a href="{% url 'fields:manager_field_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar Lapangan
+        </a>
+    </div>
+    <div class="form-section mb-4">
+        <h5 class="mb-3">Tambah Penutupan</h5>
+        <form method="post" action="">
+            {% csrf_token %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="closure_date" class="form-label">Tanggal Penutupan</label>
+                    <input type="date" id="closure_date" name="closure_date" class="form-control" required>
+                </div>
+                <div class="col-md-5">
+                    <label for="closure_reason" class="form-label">Alasan Penutupan</label>
+                    <input type="text" id="closure_reason" name="closure_reason" class="form-control" placeholder="Misal: Maintenance, Libur Nasional" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus me-1"></i> Tambah Penutupan
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="form-section">
+        <h5 class="mb-3">Daftar Jadwal Penutupan</h5>
+        <table class="table table-bordered closure-table">
+            <thead class="table-light">
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Alasan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for closure in closures %}
+                <tr>
+                    <td>{{ closure.closure_date|date:'d M Y' }}</td>
+                    <td>{{ closure.reason }}</td>
+                    <td>
+                        <a href="#" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Hapus</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Belum ada jadwal penutupan.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

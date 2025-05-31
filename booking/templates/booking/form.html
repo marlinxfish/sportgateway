@@ -1,0 +1,52 @@
+{# templates/booking/form.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    {% if booking_disabled and reason_closed %}
+      <div class="alert alert-danger">{{ reason_closed }}</div>
+    {% endif %}
+
+<div class="container mt-4">
+    <h2>Booking Lapangan: {{ field.name }}</h2>
+
+    <form method="get" class="mb-3">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label for="date" class="form-label">Pilih Tanggal:</label>
+                <input type="date" 
+                       name="date" 
+                       id="date" 
+                       class="form-control"
+                       value="{{ selected_date|date:'Y-m-d' }}"
+                       min="{{ today|date:'Y-m-d' }}"
+                       required>
+            </div>
+            <div class="col-md-2 mt-md-4 mt-2">
+                <button type="submit" class="btn btn-primary w-100">Tampilkan</button>
+            </div>
+        </div>
+    </form>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            {% for hour in available_hours %}
+                {% if hour in booked_slots %}
+                    <div class="col-3 mb-2">
+                        <button class="btn btn-danger btn-sm w-100" disabled>{{ hour }} (Booked)</button>
+                    </div>
+                {% else %}
+                    <div class="col-3 mb-2">
+                        <label class="btn btn-outline-success btn-sm w-100">
+                            <input type="checkbox" name="hours" value="{{ hour }}"> {{ hour }}
+                        </label>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-success mt-3">Lanjutkan ke Pembayaran</button>
+    </form> 
+</div>
+{% endblock %}
