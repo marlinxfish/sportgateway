@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Lapangan - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Daftar Lapangan Tersedia</h1>
+    <!-- Filter Form -->
+    <form method="get" class="row g-3 align-items-end mb-4">
+        {% comment %} <div class="col-md-4">
+            <label for="city" class="form-label">Lokasi</label>
+            <select name="city" id="city" class="form-select">
+                <option value="">Semua Kota</option>
+                {% for c in cities %}
+                    <option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div> {% endcomment %}
+        <div class="col-md-4">
+            <label for="category" class="form-label">Kategori</label>
+            <select name="category" id="category" class="form-select">
+                <option value="">Semua Kategori</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for field in fields %}
+        <div class="col d-flex">
+            <div class="card h-100 d-flex flex-column w-100">
+                {% if field.image %}
+                <img src="{{ field.image.url }}" class="card-img-top" alt="{{ field.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span class="text-muted">Tidak ada gambar</span>
+                </div>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ field.name }}</h5>
+                    <p class="card-text flex-grow-1">
+                        <i class="bi bi-geo-alt"></i> {{ field.address }}<br>
+                        <i class="bi bi-tag"></i> {{ field.category }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Harga per jam:</strong> Rp{{ field.price_per_hour|floatformat:0 }}
+                    </p>
+                    <div class="mt-auto">
+                        <a href="{% url 'booking:form' field.id %}" class="btn btn-primary w-100">
+                            <i class="bi bi-calendar-plus"></i> Pesan Sekarang
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Tidak ada lapangan yang tersedia saat ini.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

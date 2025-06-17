@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-person-plus me-2"></i>Daftar Akun Baru
+                    </h4>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" class="needs-validation" novalidate autocomplete="off">
+                        {% csrf_token %}
+                        <div class="row g-4">
+                            <!-- Username -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label fw-medium">
+                                        Username <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           name="{{ form.username.name }}" 
+                                           id="{{ form.username.id_for_label }}" 
+                                           class="form-control form-control-lg"
+                                           placeholder="Masukkan username"
+                                           required>
+                                    {% if form.username.help_text %}
+                                        <div class="form-text small">{{ form.username.help_text|safe }}</div>
+                                    {% endif %}
+                                    {% for error in form.username.errors %}
+                                        <div class="invalid-feedback d-flex align-items-center">
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label fw-medium">
+                                        Email <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="email" 
+                                           name="{{ form.email.name }}" 
+                                           id="{{ form.email.id_for_label }}" 
+                                           class="form-control form-control-lg"
+                                           placeholder="contoh@email.com"
+                                           required>
+                                    {% if form.email.help_text %}
+                                        <div class="form-text small">{{ form.email.help_text|safe }}</div>
+                                    {% endif %}
+                                    {% for error in form.email.errors %}
+                                        <div class="invalid-feedback d-flex align-items-center">
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="{{ form.password1.id_for_label }}" class="form-label fw-medium">
+                                        Password <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="password" 
+                                           name="{{ form.password1.name }}" 
+                                           id="{{ form.password1.id_for_label }}" 
+                                           class="form-control form-control-lg"
+                                           placeholder="Buat password"
+                                           required>
+                                    {% if form.password1.help_text %}
+                                        <div class="form-text small">{{ form.password1.help_text|safe }}</div>
+                                    {% endif %}
+                                    {% for error in form.password1.errors %}
+                                        <div class="invalid-feedback d-flex align-items-center">
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="{{ form.password2.id_for_label }}" class="form-label fw-medium">
+                                        Konfirmasi Password <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="password" 
+                                           name="{{ form.password2.name }}" 
+                                           id="{{ form.password2.id_for_label }}" 
+                                           class="form-control form-control-lg"
+                                           placeholder="Ulangi password"
+                                           required>
+                                    {% if form.password2.help_text %}
+                                        <div class="form-text small">{{ form.password2.help_text|safe }}</div>
+                                    {% endif %}
+                                    {% for error in form.password2.errors %}
+                                        <div class="invalid-feedback d-flex align-items-center">
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-2">
+                                <i class="bi bi-person-plus me-2"></i>Daftar Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light text-center py-3">
+                    <p class="mb-0">Sudah punya akun? 
+                        <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-medium">
+                            Login di sini
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<style>
+    .auth-container {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+    }
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    /* Style for password requirements */
+    .helptext {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    .helptext ul {
+        padding-left: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add form-control class to inputs and style checkboxes
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add form-control class to all inputs, selects, and textareas
+        const formElements = document.querySelectorAll('input:not([type="checkbox"]), select, textarea');
+        formElements.forEach(element => {
+            element.classList.add('form-control');
+            
+            // Add is-invalid class to fields with errors
+            if (element.nextElementSibling && element.nextElementSibling.classList.contains('invalid-feedback')) {
+                element.classList.add('is-invalid');
+            }
+        });
+        
+        // Style checkboxes
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-check mt-3';
+            checkbox.parentNode.insertBefore(wrapper, checkbox);
+            wrapper.appendChild(checkbox);
+            
+            const label = document.querySelector(`label[for="${checkbox.id}"]`);
+            if (label) {
+                wrapper.appendChild(label);
+                label.classList.add('form-check-label', 'ms-2');
+            }
+            
+            checkbox.classList.add('form-check-input');
+        });
+    });
+</script>
+{% endblock %}

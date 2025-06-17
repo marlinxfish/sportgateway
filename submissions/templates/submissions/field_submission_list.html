@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Daftar Pengajuan Lapangan</h2>
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-md-4">
+            <label for="city" class="form-label">Kota</label>
+            <select name="city" id="city" class="form-select">
+                <option value="">Semua Kota</option>
+                {% for c in cities %}
+                    <option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="category" class="form-label">Kategori</label>
+            <select name="category" id="category" class="form-select">
+                <option value="">Semua Kategori</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.0 }}" {% if cat.0 == category %}selected{% endif %}>{{ cat.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for field in fields %}
+        <div class="col">
+            <div class="card h-100">
+                {% if field.images %}
+                    <img src="{{ field.images.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <span>Tidak Ada Gambar</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ field.name }}</h5>
+                    <p class="card-text mb-1"><strong>Kategori:</strong> {{ field.get_category_display }}</p>
+                    <p class="card-text mb-1"><strong>Kota:</strong> {{ field.city|default:'-' }}</p>
+                    <p class="card-text"><strong>Alamat:</strong> {{ field.address|truncatechars:60 }}</p>
+                    <p class="card-text"><strong>Harga:</strong> Rp{{ field.default_price|floatformat:0 }}/jam</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">Tidak ada lapangan ditemukan.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

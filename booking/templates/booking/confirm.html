@@ -1,0 +1,23 @@
+{# templates/payments/confirm.html #}
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Konfirmasi Pembayaran</h4>
+        </div>
+        <div class="card-body">
+            <p>Silakan salin kode pembayaran berikut dan akses URL berikut untuk menyelesaikan simulasi pembayaran:</p>
+
+            <div class="alert alert-info">
+                <strong>Kode Pembayaran:</strong> {{ payment.code }}<br>
+                <strong>URL Konfirmasi:</strong> <code>{{ request.scheme }}://{{ request.get_host }}/payments/{{ payment.code }}/</code>
+            </div>
+
+            <p>Setelah mengunjungi URL tersebut, status booking Anda akan diperbarui menjadi <strong>Sudah Dibayar</strong>.</p>
+            <a href="/" class="btn btn-secondary">Kembali ke Beranda</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-login-image">
+                            <div class="d-flex align-items-center justify-content-center h-100 p-5">
+                                <img src="{% static 'assets/logo.png' %}" alt="SportGateway Logo" class="img-fluid">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Selamat Datang Kembali!</h1>
+                                </div>
+                                
+                                {% if error %}
+                                <div class="alert alert-danger">
+                                    {{ error }}
+                                </div>
+                                {% endif %}
+                                
+                                <form class="user" method="POST" action="{% url 'manager_dashboard:login' %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <input type="text" name="username" class="form-control form-control-user"
+                                            id="username" aria-describedby="emailHelp"
+                                            placeholder="Masukkan username..." required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="password" class="form-control form-control-user"
+                                            id="password" placeholder="Password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">
+                                        Login
+                                    </button>
+                                </form>
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" href="{% url 'accounts:login' %}">Login sebagai Pengguna Biasa</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-login-image {
+    background: #4e73df;
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    background-size: cover;
+}
+
+.bg-login-image img {
+    max-width: 100%;
+    height: auto;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}Riwayat Booking Saya - SportGateway{% endblock %}
+
+{% block extra_head %}
+<style>
+    .field-image {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        object-fit: cover;
+    }
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.35em 0.65em;
+    }
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="px-3">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Riwayat Booking Saya</h1>
+        <a href="{% url 'booking:index' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Booking Baru
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'payment_success' not in message.tags %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+                    <div>{{ message }}</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Booking List -->
+    <div class="card">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold">Daftar Booking Saya</h6>
+        </div>
+        <div class="card-body">
+            {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="dataTable" width="100%" cellspacing="0" style="margin-bottom: 0;">
+                        <thead class="table-light align-middle">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">No</th>
+                                <th>Lapangan</th>
+                                <th class="text-center" style="width: 100px;">Tanggal</th>
+                                <th class="text-center" style="width: 150px;">Waktu</th>
+                                <th class="text-center" style="width: 80px;">Durasi</th>
+                                <th class="text-end" style="width: 120px;">Total</th>
+                                <th class="text-center" style="width: 120px;">Status</th>
+                                <th class="text-center" style="width: 180px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr class="{% if forloop.counter0 < 3 %}table-active{% endif %}">
+                                <td class="text-center">{{ start_index|add:forloop.counter0 }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if booking.field.image %}
+                                        <img src="{{ booking.field.image.url }}" class="me-2" width="40" height="40" style="border-radius: 4px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; border-radius: 4px;">
+                                            <i class="fas fa-futbol text-muted"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold">{{ booking.field.name }}</div>
+                                            <small class="text-muted">{{ booking.field.category }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">{{ booking.date|date:"d M Y" }}</td>
+                                <td class="text-center">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</td>
+                                <td class="text-center">{{ booking.duration }} jam</td>
+                                <td class="text-end fw-bold">Rp{{ booking.total_price|floatformat:0|intcomma }}</td>
+                                <td class="text-center">
+                                    {% if booking.is_cancelled %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2">
+                                        <i class="fas fa-times-circle me-1"></i> Dibatalkan
+                                    </span>
+                                    {% elif booking.is_paid %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i> Lunas
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Belum Dibayar
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        {% if booking.is_paid or booking.is_cancelled %}
+                                            <!-- Tombol Detail (hanya untuk status Lunas/Dibatalkan) -->
+                                            <a href="#" class="btn btn-outline-info btn-sm" title="Detail" data-bs-toggle="modal" data-bs-target="#detailModal{{ booking.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        {% else %}
+                                            <!-- Tombol Bayar dan Batal (hanya untuk status menunggu pembayaran) -->
+                                            <a href="{% url 'payments:method' booking.id %}" class="btn btn-success btn-sm" title="Bayar">
+                                                <i class="fas fa-credit-card me-1"></i> Bayar
+                                            </a>
+                                            
+                                            <form method="post" action="{% url 'booking:cancel' booking.id %}" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking ini?')">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Batalkan">
+                                                    <i class="fas fa-times me-1"></i> Batal
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Modal Detail -->
+                                    <div class="modal fade" id="detailModal{{ booking.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Detail Booking</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <h6>Informasi Lapangan</h6>
+                                                        <p class="mb-1"><strong>Nama:</strong> {{ booking.field.name }}</p>
+                                                        <p class="mb-1"><strong>Lokasi:</strong> {{ booking.field.address }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>Detail Booking</h6>
+                                                        <p class="mb-1"><strong>Tanggal:</strong> {{ booking.date|date:"l, d F Y" }}</p>
+                                                        <p class="mb-1"><strong>Waktu:</strong> {{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</p>
+                                                        <p class="mb-1"><strong>Durasi:</strong> {{ booking.duration }} jam</p>
+                                                        <p class="mb-1"><strong>Total:</strong> Rp{{ booking.total_price|intcomma }}</p>
+                                                    </div>
+                                                    <div>
+                                                        <h6>Status</h6>
+                                                        {% if booking.is_cancelled %}
+                                                            <span class="badge bg-danger">Dibatalkan</span>
+                                                        {% elif booking.is_paid %}
+                                                            <span class="badge bg-success">Lunas</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning">Menunggu Pembayaran</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                    {% if not booking.is_paid and not booking.is_cancelled %}
+                                                    <a href="{% url 'payments:method' booking.id %}" class="btn btn-primary">
+                                                        <i class="fas fa-credit-card me-1"></i> Bayar Sekarang
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <!-- Pagination -->
+                    {% if bookings.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if bookings.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="First">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ bookings.previous_page_number }}" aria-label="Previous">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                                </li>
+                            {% endif %}
+
+                            {% for i in page_range %}
+                                {% if bookings.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if bookings.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ bookings.next_page_number }}" aria-label="Next">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ bookings.paginator.num_pages }}" aria-label="Last">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                        <div class="text-muted text-center mt-2">
+                            Menampilkan halaman {{ bookings.number }} dari {{ bookings.paginator.num_pages }}
+                            (Total {{ paginator.count }} pesanan)
+                        </div>
+                    </nav>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                        <h5 class="mb-3">Belum ada riwayat booking</h5>
+                        <p class="mb-4">Mulai dengan membuat booking baru</p>
+                        <a href="{% url 'booking:index' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i> Buat Booking Baru
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Page level plugins -->
+<script src="{% static 'sb-admin-2/vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<link href="{% static 'sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+
+<!-- Page level custom scripts -->
+<script>
+    $(document).ready(function() {
+        // Inisialisasi DataTables
+        $('#dataTable').DataTable({
+            "order": [[2, "desc"], [3, "desc"]], // Urutkan berdasarkan tanggal dan waktu
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+            },
+            "columnDefs": [
+                { "orderable": false, "targets": [0, 7] } // Non-aktifkan pengurutan untuk kolom aksi
+            ]
+        });
+    });
+</script>
+{% endblock %}

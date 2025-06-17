@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+{% load i18n %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verifikasi Email Anda</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #f8f9fa;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #0d6efd;
+            color: #fff !important;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #0b5ed7;
+            text-decoration: none;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+        }
+        .code {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 15px 0;
+            display: block;
+        }
+        .note {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Verifikasi Alamat Email Anda</h2>
+    </div>
+    <div class="content">
+        <p>Halo {{ user.first_name|default:user.username }},</p>
+        
+        <p>Terima kasih telah mendaftar di Sport Gateway. Untuk mengaktifkan akun Anda, silakan verifikasi alamat email Anda dengan menekan tombol di bawah ini:</p>
+        
+        <p style="text-align: center;">
+            <a href="{{ verification_url }}" class="button">
+                Verifikasi Email Saya
+            </a>
+        </p>
+        
+        <p>Atau salin dan tempel tautan berikut ke peramban Anda:</p>
+        <a href="{{ verification_url }}" class="code">{{ verification_url }}</a>
+        
+        <p class="note">Tautan verifikasi ini akan kedaluwarsa dalam 24 jam. Jika Anda tidak merasa mendaftar akun ini, Anda dapat mengabaikan email ini.</p>
+        
+        <p>Salam hangat,<br>
+        Tim Sport Gateway</p>
+    </div>
+    <div class="footer">
+        <p>Ini adalah pesan otomatis, harap tidak membalas email ini.</p>
+        <p> Sport Gateway. {% trans 'All rights reserved.' %}</p>
+    </div>
+</body>
+</html>

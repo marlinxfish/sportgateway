@@ -1,0 +1,123 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% block title %}Edit Profil - SportGateway{% endblock %}
+
+{% block manager_content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'manager_dashboard:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Profil</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-user-edit text-primary me-2"></i>Edit Profil</h1>
+        </div>
+        <div>
+            <a href="{% url 'manager_dashboard:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="form-section mb-4">
+    <h2 class="section-title"><i class="fas fa-id-card me-2"></i>Data Pribadi</h2>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label for="id_username" class="form-label fw-bold required-field pb-2">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="small text-danger">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label for="id_email" class="form-label fw-bold required-field pb-2">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="small text-danger">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label for="id_first_name" class="form-label fw-bold pb-2">Nama</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="small text-danger">{{ form.first_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+    <!-- <div class="form-group mb-3">
+        <label for="id_profile_picture" class="form-label fw-bold pb-2">Foto Profil</label>
+        {% if form.instance.profile_image and form.instance.profile_image.url %}
+            <div class="mb-2">
+                <img src="{{ form.instance.profile_image.url }}" alt="Foto Profil" class="img-thumbnail" style="max-width: 120px; max-height: 120px;">
+            </div>
+        {% endif %}
+        {{ form.profile_image }}
+        {% if form.profile_picture.errors %}
+            <div class="small text-danger">{{ form.profile_picture.errors.0 }}</div>
+        {% endif %}
+        <small class="form-text text-muted">Format: jpg, png. Ukuran maks. 2MB.</small>
+    </div> -->
+</div>
+    </div>
+</div>
+        <div class="form-section mb-4">
+            <h2 class="section-title"><i class="fas fa-key me-2"></i>Ganti Password <span class="small text-muted">(Kosongkan jika tidak ingin mengubah password)</span></h2>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="id_old_password" class="form-label fw-bold pb-2">Password Lama</label>
+                        {{ password_form.old_password }}
+                        {% if password_form.old_password.errors %}
+                            <div class="small text-danger">{{ password_form.old_password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="id_new_password1" class="form-label fw-bold pb-2">Password Baru</label>
+                        {{ password_form.new_password1 }}
+                        {% if password_form.new_password1.errors %}
+                            <div class="small text-danger">{{ password_form.new_password1.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="id_new_password2" class="form-label fw-bold pb-2">Konfirmasi Password Baru</label>
+                        {{ password_form.new_password2 }}
+                        {% if password_form.new_password2.errors %}
+                            <div class="small text-danger">{{ password_form.new_password2.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'manager_dashboard:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Simpan Perubahan
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

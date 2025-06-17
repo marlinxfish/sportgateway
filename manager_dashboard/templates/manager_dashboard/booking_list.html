@@ -1,0 +1,294 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+
+{% block title %}Riwayat Booking - SportGateway{% endblock %}
+
+{% block extra_head %}
+<style>
+.fade-in {animation: fadeInUp 0.8s ease;}
+@keyframes fadeInUp {from {opacity:0;transform:translateY(30px);} to {opacity:1;transform:none;}}
+.today-row {background: linear-gradient(90deg, #e3f2fd 0%, #fff 100%); font-weight: 500;}
+.progress-bar-mini {transition: width 0.6s cubic-bezier(.4,0,.2,1);}
+</style>
+<!-- Custom CSS -->
+<style>
+    .card {
+        margin-bottom: 1rem;
+    }
+    .card-title {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    .card-text {
+        font-weight: bold;
+    }
+    .table {
+        margin-top: 1.5rem;
+    }
+    .badge {
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}
+
+{% block manager_content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Riwayat Booking Lapangan</h1>
+</div>
+
+<!-- Statistik Ringkas -->
+<div class="row mb-4 fade-in">
+  <div class="col-md-4 mb-3">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body d-flex align-items-center">
+        <div class="me-3">
+          <span class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:48px;height:48px;font-size:1.5rem;">
+            <i class="fas fa-calendar-check"></i>
+          </span>
+        </div>
+        <div>
+          <div class="text-muted small">Total Booking</div>
+          <div class="fs-3 fw-bold">{{ bookings.count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body d-flex align-items-center">
+        <div class="me-3">
+          <span class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" style="width:48px;height:48px;font-size:1.5rem;">
+            <i class="fas fa-check-circle"></i>
+          </span>
+        </div>
+        <div>
+          <div class="text-muted small">Sudah Dibayar</div>
+          <div class="fs-3 fw-bold">{{ paid_count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-3">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body d-flex align-items-center">
+        <div class="me-3">
+          <span class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center" style="width:48px;height:48px;font-size:1.5rem;">
+            <i class="fas fa-exclamation-circle"></i>
+          </span>
+        </div>
+        <div>
+          <div class="text-muted small">Belum Dibayar</div>
+          <div class="fs-3 fw-bold">{{ unpaid_count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-2 mb-3">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body d-flex align-items-center">
+        <div class="me-3">
+          <span class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center" style="width:48px;height:48px;font-size:1.5rem;">
+            <i class="fas fa-times-circle"></i>
+          </span>
+        </div>
+        <div>
+          <div class="text-muted small">Dibatalkan</div>
+          <div class="fs-3 fw-bold">{{ cancelled_count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Form Filter -->
+<div class="row mb-4 justify-content-center fade-in">
+  <div class="col-md-6">
+    <form method="get" class="card card-body shadow-sm border-0">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label mb-1">Filter Tanggal:</label>
+          <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter"></i> Terapkan</button>
+        </div>
+        <div class="col-md-3">
+          <a href="{% url 'manager_dashboard:booking_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-undo"></i> Reset</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabel Booking -->
+<div class="card shadow border-0 mb-4 fade-in">
+    <div class="card-header bg-white border-0 pb-0">
+      <h5 class="mb-0 fw-bold"><i class="fas fa-list-alt text-primary"></i> Daftar Booking</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle" id="dataTable" width="100%" cellspacing="0" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Penyewa</th>
+                        <th>Lapangan</th>
+                        <th>Tanggal</th>
+                        <th>Jam</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if bookings %}
+                        {% for b in bookings %}
+                        <tr>
+                            <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+                            <td>{{ b.field.name }}</td>
+                            <td><span class="badge bg-light text-dark"><i class="fas fa-calendar-alt"></i> {{ b.date|date:"d M Y" }}</span></td>
+                            <td><span class="badge bg-info text-dark"><i class="fas fa-clock"></i> {{ b.start_time|time:"H:i" }} - {{ b.end_time|time:"H:i" }}</span></td>
+                            <td>
+                                {% if b.is_cancelled %}
+                                    <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Dibatalkan"><i class="fas fa-times-circle"></i> Dibatalkan</span>
+                                {% elif b.is_paid %}
+                                    <span class="badge bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Sudah Dibayar"><i class="fas fa-check-circle"></i> Sudah Dibayar</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Belum Dibayar"><i class="fas fa-exclamation-circle"></i> Belum Dibayar</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Tidak ada data booking</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+                </tbody>
+                <tfoot class="d-none">
+                    <tr>
+                        <th>Penyewa</th>
+                        <th>Lapangan</th>
+                        <th>Tanggal</th>
+                        <th>Jam</th>
+                        <th>Status</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables CSS (CDN fallback) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<!-- DataTables JS (CDN fallback) -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<!-- Page level plugins -->
+<script src="{% static 'sb-admin-2/vendor/chart.js/Chart.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Inisialisasi DataTable
+    $(document).ready(function() {
+        const $dataTable = $('#dataTable');
+        
+        // Hapus inisialisasi sebelumnya jika ada
+        if ($.fn.DataTable.isDataTable($dataTable)) {
+            $dataTable.DataTable().destroy(true);
+        }
+        
+        // Hapus pesan yang sudah ada
+        $('.no-data-message, .alert-warning, .dataTables_empty').remove();
+        
+        // Inisialisasi DataTable sederhana
+        const table = $dataTable.DataTable({
+            "order": [[2, "desc"], [3, "asc"]],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json",
+                "emptyTable": "Tidak ada data booking yang tersedia"
+            },
+            "responsive": true,
+            "paging": true,
+            "info": true,
+            "searching": true,
+            "dom": 'rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            "initComplete": function() {
+                $('.dataTables_processing').hide();
+                // Inisialisasi tooltip
+                $('[data-bs-toggle="tooltip"]').tooltip();
+            }
+        });
+        
+        // Tampilkan pesan jika tidak ada data
+        if (table.data().count() === 0) {
+            $dataTable.hide();
+            $('.card-body').append(
+                '<div class="alert alert-info no-data-message mt-3">' +
+                '<i class="fas fa-info-circle me-2"></i>Tidak ada data booking yang tersedia untuk ditampilkan.' +
+                '</div>'
+            );
+        }
+    });
+    
+    // Inisialisasi Chart jika ada
+    try {
+        const ctx = document.getElementById('bookingChart');
+        if (ctx) {
+            const labels = JSON.parse(document.getElementById('labels-data')?.textContent || '[]');
+            const data = JSON.parse(document.getElementById('counts-data')?.textContent || '[]');
+            
+            if (labels.length > 0 && data.length > 0) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Jumlah Booking',
+                            data: data,
+                            backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Jumlah: ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing chart:', error);
+        }
+    }
+});
+</script>
+{% endblock %}

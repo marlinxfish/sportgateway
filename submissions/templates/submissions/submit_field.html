@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html style="background: #f4f7fb; min-height:100vh;">
+<head>
+    <title>Ajukan Lapangan</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <style>#map { height: 400px; }</style>
+</head>
+<body>
+    <div class="container mt-5" style="max-width: 800px;">
+        <div class="card shadow-lg border-primary" style="border-radius:18px; background: #ffffffee;">
+            <div class="card-body p-4">
+                <h2 class="mb-3 text-primary">Form Pengajuan Lapangan</h2>
+                <p class="mb-4 text-muted">Isi data lapangan dengan lengkap dan benar. Pastikan lokasi pada peta sudah sesuai. Pilih lokasi di peta agar alamat otomatis terisi.</p>
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.city }}
+
+    <div class="mb-4">
+        <h5 class="text-primary">Data Pengelola</h5>
+        <div class="row g-3">
+            <div class="col-md-4 mb-3">
+                <label for="id_email" class="form-label">Email Pengelola</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="id_username" class="form-label">Username</label>
+                {{ form.username }}
+                <div class="form-text">Username untuk login ke sistem</div>
+                {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="id_password" class="form-label">Password</label>
+                {{ form.password }}
+                <div class="form-text">Minimal 8 karakter, gunakan kombinasi huruf dan angka</div>
+                {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="id_nama_pengelola" class="form-label">Nama Pengelola</label>
+                {{ form.nama_pengelola }}
+                {% if form.nama_pengelola.errors %}<div class="text-danger small">{{ form.nama_pengelola.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="id_nik" class="form-label">NIK Pengelola</label>
+                {{ form.nik }}
+                {% if form.nik.errors %}<div class="text-danger small">{{ form.nik.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <h5 class="text-primary">Data Lapangan</h5>
+        <div class="row g-3">
+            <div class="col-md-6 mb-3">
+                <label for="id_name" class="form-label">Nama Lapangan</label>
+                {{ form.name }}
+                {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="id_category" class="form-label">Kategori</label>
+                {{ form.category }}
+                {% if form.category.errors %}<div class="text-danger small">{{ form.category.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="id_default_price" class="form-label">Harga per Jam (Rp)</label>
+                {{ form.default_price }}
+                {% if form.default_price.errors %}<div class="text-danger small">{{ form.default_price.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="id_address" class="form-label">Alamat (otomatis dari peta)</label>
+            {{ form.address }}
+            {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6 mb-3">
+                <label for="id_latitude" class="form-label">Latitude</label>
+                {{ form.latitude }}
+                {% if form.latitude.errors %}<div class="text-danger small">{{ form.latitude.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_longitude" class="form-label">Longitude</label>
+                {{ form.longitude }}
+                {% if form.longitude.errors %}<div class="text-danger small">{{ form.longitude.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <h5 class="text-primary">Upload Dokumen</h5>
+        <div class="row g-3">
+            <div class="col-md-4 mb-3">
+                <label for="id_images" class="form-label">Gambar Lapangan</label>
+                {{ form.images }}
+                {% if form.images.errors %}<div class="text-danger small">{{ form.images.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="id_agreement_letter" class="form-label">Surat Pernyataan</label>
+                {{ form.agreement_letter }}
+                {% if form.agreement_letter.errors %}<div class="text-danger small">{{ form.agreement_letter.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="id_ownership_proof" class="form-label">Bukti Kepemilikan</label>
+                {{ form.ownership_proof }}
+                {% if form.ownership_proof.errors %}<div class="text-danger small">{{ form.ownership_proof.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-primary">Tentukan Lokasi di Peta</h5>
+                        <div class="mb-2 text-muted small">Klik atau drag marker untuk menentukan lokasi. Alamat dan kota akan terisi otomatis.</div>
+                        <div id="map" style="height: 350px; border-radius: 8px;"></div>
+                        <div id="alamat-autofill" class="form-text text-success"></div>
+                        <div id="alamat-loading" class="d-none mt-2 text-center">
+                            <div class="spinner-border text-primary" role="status" style="width:2rem;height:2rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="small text-muted">Mengambil data lokasi...</div>
+                        </div>
+                    </div>
+                    <button id="submit-btn" type="submit" class="btn btn-primary w-100 py-2 fs-5">Kirim Pengajuan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        body { background: #f4f7fb; }
+        input, select, textarea {
+            border-radius: 6px !important;
+            margin-bottom: 2px;
+        }
+        .form-label { font-weight: 500; }
+        .card { border-radius: 18px; border: 1.5px solid #0d6efd22; box-shadow: 0 2px 18px #0d6efd11; }
+        textarea { min-height: 70px; }
+        #alamat-autofill { font-size: 0.98em; }
+    </style>
+
+    <style>
+        input, select, textarea {
+            border-radius: 6px !important;
+            margin-bottom: 2px;
+        }
+        .form-label { font-weight: 500; }
+    </style>
+
+    <script>
+        var map = L.map('map').setView([-6.2, 106.8], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var marker = L.marker([-6.2, 106.8], {draggable: true}).addTo(map);
+        var isFetchingLocation = false;
+
+        function autofillLatLngAndAddress(lat, lng) {
+            document.getElementById("id_latitude").value = lat;
+            document.getElementById("id_longitude").value = lng;
+            // Tampilkan spinner loading
+            document.getElementById("alamat-loading").classList.remove("d-none");
+            document.getElementById("submit-btn").disabled = true;
+            document.getElementById("submit-btn").innerText = "Mengambil lokasi...";
+            isFetchingLocation = true;
+            // Reverse geocode ke Nominatim
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        document.getElementById("id_address").value = data.display_name;
+                        document.getElementById("alamat-autofill").innerText = 'Alamat otomatis: ' + data.display_name;
+                        // Isi field kota jika ada
+                        let cityField = document.getElementById("id_city");
+                        if (cityField && data.address) {
+                            // Coba berbagai kemungkinan field untuk kota
+                            let city = data.address.city || 
+                                      data.address.town || 
+                                      data.address.village ||
+                                      data.address.county ||
+                                      data.address.state_district ||
+                                      data.address.state ||
+                                      '';
+                            
+                            // Bersihkan nama kota (hilangkan 'Kota', 'Kabupaten', dll)
+                            if (city) {
+                                city = city.replace(/^(Kota|Kabupaten|Kecamatan|Kelurahan|Desa)\s*/i, '');
+                                city = city.trim();
+                            }
+                            
+                            cityField.value = city;
+                        }
+                    } else {
+                        document.getElementById("alamat-autofill").innerText = 'Alamat tidak ditemukan.';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById("alamat-autofill").innerText = 'Gagal mengambil alamat.';
+                })
+                .finally(() => {
+                    document.getElementById("alamat-loading").classList.add("d-none");
+                    document.getElementById("submit-btn").disabled = false;
+                    document.getElementById("submit-btn").innerText = "Kirim Pengajuan";
+                    isFetchingLocation = false;
+                });
+        }
+
+        marker.on('dragend', function(e) {
+            var position = marker.getLatLng();
+            autofillLatLngAndAddress(position.lat, position.lng);
+        });
+
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            autofillLatLngAndAddress(e.latlng.lat, e.latlng.lng);
+        });
+
+        L.Control.geocoder({
+            defaultMarkGeocode: false
+        })
+        .on('markgeocode', function(e) {
+            var center = e.geocode.center;
+            marker.setLatLng(center);
+            map.setView(center, 16);
+            autofillLatLngAndAddress(center.lat, center.lng);
+        })
+        .addTo(map);
+
+        // Set default lokasi
+        autofillLatLngAndAddress(-6.2, 106.8);
+        // Pastikan tombol submit disable saat loading lokasi
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var submitBtn = document.getElementById('submit-btn');
+            // Jika masih fetch lokasi, cegah submit!
+            if (isFetchingLocation) {
+                e.preventDefault();
+                alert('Tunggu hingga data lokasi selesai diambil!');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Kirim Pengajuan';
+                return false;
+            }
+            // Validasi: city, lat, lng harus terisi
+            var city = document.getElementById('id_city').value;
+            var lat = document.getElementById('id_latitude').value;
+            var lng = document.getElementById('id_longitude').value;
+            if (!city || !lat || !lng) {
+                e.preventDefault();
+                alert('Pastikan lokasi di peta sudah dipilih dan data kota terisi!');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Kirim Pengajuan';
+                return false;
+            }
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Mengirim...';
+        });
+    </script>
+</body>
+</html>

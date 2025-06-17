@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Tentang Kami - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="mb-4">Tentang SportGateway</h1>
+                    
+                    <div class="row g-5">
+                        <div class="col-lg-6">
+                            <h3 class="h4 mb-3">Siapa Kami?</h3>
+                            <p class="lead">
+                                SportGateway adalah platform booking lapangan olahraga terdepan yang menghubungkan pecinta olahraga dengan penyedia lapangan terbaik.
+                            </p>
+                            <p>
+                                Didirikan pada tahun 2025, kami berkomitmen untuk memberikan pengalaman booking lapangan olahraga yang mudah, cepat, dan terpercaya. Dengan berbagai pilihan lapangan dari berbagai cabang olahraga, kami hadir untuk memenuhi kebutuhan olahraga masyarakat modern.
+                            </p>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="img-container">
+                                <img src="{% static 'assets/logo.png' %}" 
+                                     alt="Tentang Kami" 
+                                     class="content-img">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h3 class="h4 mb-4">Visi & Misi</h3>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <h4 class="h5 text-primary">Visi</h4>
+                                            <p class="mb-0">
+                                                Menjadi platform booking lapangan olahraga terdepan yang menghubungkan seluruh pecinta olahraga di Indonesia dengan fasilitas olahraga terbaik.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <h4 class="h5 text-primary">Misi</h4>
+                                            <ul class="mb-0 ps-3">
+                                                <li>Menyediakan akses mudah untuk menemukan dan memesan lapangan olahraga</li>
+                                                <li>Mendukung gaya hidup sehat masyarakat Indonesia</li>
+                                                <li>Memberikan pengalaman pengguna yang terbaik</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

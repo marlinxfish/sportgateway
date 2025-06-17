@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SportGateway{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    <h1 class="h3 mb-4">{{ title }}</h1>
+                    <div class="alert alert-danger">
+                        <p class="mb-0">{{ message }}</p>
+                    </div>
+                    
+                    {% if solution %}
+                    <div class="alert alert-info mt-4">
+                        <h5 class="alert-heading">Solusi:</h5>
+                        <p class="mb-0">{{ solution }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-5">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary me-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Halaman Login
+                        </a>
+                        <a href="{% url 'pages:home' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Halaman Utama
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

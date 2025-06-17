@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Kontak - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="mb-4">Hubungi Kami</h1>
+                    <p class="lead mb-5">
+                        Kami siap membantu Anda. Kirimkan pesan atau hubungi kami melalui informasi kontak di bawah ini.
+                    </p>
+
+                    <div class="row g-5">
+                        <!-- Contact Form -->
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h3 class="h5 mb-4">Kirim Pesan</h3>
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Nama Lengkap</label>
+                                            <input type="text" class="form-control" id="name" placeholder="Masukkan nama Anda" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" placeholder="nama@contoh.com" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="subject" class="form-label">Subjek</label>
+                                            <input type="text" class="form-control" id="subject" placeholder="Subjek pesan" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="message" class="form-label">Pesan</label>
+                                            <textarea class="form-control" id="message" rows="5" placeholder="Tulis pesan Anda di sini..." required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="bi bi-send me-2"></i>Kirim Pesan
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h3 class="h5 mb-4">Informasi Kontak</h3>
+                                    
+                                    <!-- <div class="d-flex mb-4">
+                                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                            <i class="bi bi-geo-alt text-primary" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="h6 mb-1">Alamat</h4>
+                                            <p class="mb-0 text-muted">
+                                                Jl. Contoh No. 123<br>
+                                                Kota Bandung, Jawa Barat<br>
+                                                Indonesia 40123
+                                            </p>
+                                        </div> 
+                                    </div>  -->
+
+                                    <div class="d-flex mb-4">
+                                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                            <i class="bi bi-envelope text-primary" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="h6 mb-1">Email</h4>
+                                            <p class="mb-0">
+                                                <a href="mailto:info@sportgateway.com" class="text-decoration-none">info@sportgateway.com</a><br>
+                                                <a href="mailto:cs@sportgateway.com" class="text-decoration-none">cs@sportgateway.com</a>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex mb-4">
+                                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                            <i class="bi bi-telephone text-primary" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="h6 mb-1">Telepon</h4>
+                                            <p class="mb-0">
+                                                <a href="tel:+622212345678" class="text-decoration-none">(022) 1234 5678</a><br>
+                                                <a href="https://wa.me/6281234567890" class="text-decoration-none">
+                                                    <i class="bi bi-whatsapp text-success"></i> +62 812-3456-7890
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                            <i class="bi bi-clock text-primary" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="h6 mb-1">Jam Operasional</h4>
+                                            <p class="mb-0 text-muted">
+                                                Senin - Jumat: 08.00 - 22.00 WIB<br>
+                                                Sabtu - Minggu: 07.00 - 23.00 WIB
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inisialisasi tooltip
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,392 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard Manager - SportGateway{% endblock %}
+
+{% block extra_head %}
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+        font-weight: 600;
+    }
+    .stat-card {
+        border-left: 4px solid #4e73df;
+    }
+    .stat-card.success {
+        border-left-color: #1cc88a;
+    }
+    .stat-card.warning {
+        border-left-color: #f6c23e;
+    }
+    .stat-card.danger {
+        border-left-color: #e74a3b;
+    }
+</style>
+{% endblock %}
+
+{% block manager_content %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <div class="d-flex align-items-center">
+            <span class="mr-2 text-gray-600"><i class="fas fa-calendar-alt mr-2"></i>{{ today|date:"d F Y" }}</span>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row">
+        <!-- Pendapatan Bulan Ini -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Pendapatan Bulan Ini</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Rp {{ monthly_income|default:0|intcomma }}</div>
+                            <div class="mt-2 text-muted">
+                                <small>Total: Rp {{ total_earnings|default:0|intcomma }}</small>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Booking Bulan Ini -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card success h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Booking (Bulan Ini)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ monthly_bookings|default:0 }}</div>
+                            <div class="mt-2 text-muted">
+                                <small>Total: {{ total_active_bookings|default:0 }} booking aktif</small>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Pending -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card warning h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Menunggu Pembayaran</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ booking_status.pending|default:0 }}</div>
+                            <div class="mt-2">
+                                <span class="badge bg-warning text-dark">Perlu Konfirmasi</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Dibatalkan -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card danger h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Booking Dibatalkan</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cancelled_count|default:0 }}</div>
+                            <div class="mt-2">
+                                <span class="badge bg-danger">Total Dibatalkan</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Content Row -->
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Jumlah Booking per Bulan -->
+        <div class="col-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Statistik Booking 12 Bulan Terakhir</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="bookingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-12 col-lg-6 mb-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Status Booking</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-pie pt-4 pb-2">
+                <canvas id="bookingStatusChart"></canvas>
+            </div>
+            <div class="mt-4 text-center small">
+                <span class="mr-2">
+                    <i class="fas fa-circle text-success"></i> Sukses
+                </span>
+                <span class="mr-2">
+                    <i class="fas fa-circle text-warning"></i> Pending
+                </span>
+                <span class="mr-2">
+                    <i class="fas fa-circle text-danger"></i> Batal
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Booking Terbaru -->
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Booking Terbaru</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Kode Booking</th>
+                                <th>Lapangan</th>
+                                <th>Tanggal</th>
+                                <th>Waktu</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings|slice:":5" %}
+                            <tr>
+                                <td>
+    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailBookingModal{{ booking.id }}">Detail</button>
+    <!-- Modal Detail Booking -->
+    <div class="modal fade" id="detailBookingModal{{ booking.id }}" tabindex="-1" role="dialog" aria-labelledby="detailBookingLabel{{ booking.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered w-100" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailBookingLabel{{ booking.id }}">Detail Booking</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><strong>Kode Booking:</strong> {{ booking.booking_code }}</li>
+              <li class="list-group-item"><strong>Nama Lapangan:</strong> {{ booking.field.name }}</li>
+              <li class="list-group-item"><strong>Tanggal:</strong> {{ booking.date|date:"d M Y" }}</li>
+              <li class="list-group-item"><strong>Jam:</strong> {{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</li>
+              <li class="list-group-item"><strong>Total Harga:</strong> Rp {{ booking.total_price|intcomma }}</li>
+              <li class="list-group-item">
+                  <strong>Status:</strong> 
+                  {% if booking.is_cancelled %}
+                      <span class="badge bg-danger">Dibatalkan</span>
+                  {% elif booking.is_paid %}
+                      <span class="badge bg-success">Selesai</span>
+                  {% else %}
+                      <span class="badge bg-warning text-dark">Menunggu</span>
+                  {% endif %}
+              </li>
+              <li class="list-group-item"><strong>Pemesan:</strong> {{ booking.user.get_full_name|default:booking.user.username }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+</td>
+                                <td>{{ booking.field.name }}</td>
+                                <td>{{ booking.date|date:"d M Y" }}</td>
+                                <td>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</td>
+                                <td>
+    {% if booking.is_cancelled %}
+        <span class="badge badge-danger">Dibatalkan</span>
+    {% elif booking.is_paid %}
+        <span class="badge badge-success">Selesai</span>
+    {% else %}
+        <span class="badge badge-warning">Menunggu</span>
+    {% endif %}
+</td>
+                                <td>Rp {{ booking.total_price|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Tidak ada data booking</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<!-- Page level plugins -->
+<script src="{% static 'sb-admin-2/vendor/chart.js/Chart.min.js' %}"></script>
+<script>
+    // Data dari context
+    const monthlyRevenue = {{ monthly_revenue|default:"[]"|safe }};
+    const monthlyLabels = {{ monthly_labels|default:"[]"|safe }};
+    const monthlyBookingCounts = {{ monthly_booking_counts|default:"[]"|safe }};
+    const bookingBarData = {{ monthly_booking_counts|default:"[]"|safe }};
+    const bookingStatus = {
+        success: {{ booking_status.success|default:0 }},
+        pending: {{ booking_status.pending|default:0 }},
+        cancelled: {{ booking_status.cancelled|default:0 }}
+    };
+
+    // Format angka dengan pemisah ribuan
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Format uang dengan prefix Rp
+    function formatCurrency(num) {
+        return 'Rp ' + formatNumber(num);
+    }
+
+    // Grafik Jumlah Booking per Bulan
+    const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+    const bookingsChart = new Chart(bookingsCtx, {
+        type: 'bar',
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                label: 'Jumlah Booking',
+                data: monthlyBookingCounts,
+                backgroundColor: 'rgba(28, 200, 138, 0.7)',
+                borderColor: 'rgba(28, 200, 138, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+                maxBarThickness: 40
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold',
+                        family: "'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                    },
+                    bodyFont: {
+                        size: 13,
+                        family: "'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            return context.raw + ' booking' + (context.raw !== 1 ? 's' : '');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Initialize animations when the document is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.5s ease-out';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 150 * index);
+        });
+    });
+
+    // Pie Chart Status Booking
+    if (document.getElementById('bookingStatusChart')) {
+        new Chart(document.getElementById('bookingStatusChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Sukses', 'Pending', 'Batal'],
+                datasets: [{
+                    data: [bookingStatus.success, bookingStatus.pending, bookingStatus.cancelled],
+                    backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'],
+                }]
+            },
+            options: {
+                plugins: { legend: { display: true, position: 'bottom' } },
+                responsive: true
+            }
+        });
+    }
+</script>
+{% endblock %}

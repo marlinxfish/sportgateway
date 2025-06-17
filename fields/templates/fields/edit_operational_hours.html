@@ -1,0 +1,283 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Atur Jam Operasional - {{ field.name }} - SportGateway{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<style>
+    .day-card {
+        border: 1px solid #e3e6f0;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+    .day-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    }
+    .day-card .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+        font-weight: 600;
+        padding: 0.75rem 1.25rem;
+        cursor: pointer;
+    }
+    .day-card .card-body {
+        padding: 1.25rem;
+        background-color: #fff;
+    }
+    .form-switch .form-check-input {
+        width: 2.5em;
+        margin-left: -2.5em;
+        cursor: pointer;
+    }
+    .form-switch .form-check-label {
+        cursor: pointer;
+        padding-left: 0.5rem;
+    }
+    .time-slot {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background-color: #f8f9fc;
+        border-radius: 6px;
+    }
+    .time-slot:last-child {
+        margin-bottom: 0;
+    }
+    .time-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+    }
+    .time-input-separator {
+        font-weight: bold;
+        color: #6c757d;
+    }
+    .form-control-sm {
+        max-width: 120px;
+    }
+    .btn-remove-time {
+        color: #dc3545;
+        background: none;
+        border: none;
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+        border-radius: 4px;
+    }
+    .btn-remove-time:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .btn-add-time {
+        margin-top: 0.5rem;
+        color: #0d6efd;
+        background: none;
+        border: 1px dashed #dee2e6;
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-add-time:hover {
+        background-color: #f8f9fa;
+        border-color: #0d6efd;
+    }
+    .no-times-message {
+        color: #6c757d;
+        font-style: italic;
+        padding: 0.5rem 0;
+    }
+    .field-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .field-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    .field-info h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+    .field-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    }
+    @media (max-width: 768px) {
+        .time-input-wrapper {
+            flex-wrap: wrap;
+        }
+        .form-control-sm {
+            max-width: 100%;
+            flex: 1 0 100%;
+        }
+        .time-input-separator {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block manager_content %}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'manager_dashboard:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'fields:manager_field_list' %}">Daftar Lapangan</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'fields:field_detail' field.id %}">{{ field.name|truncatechars:20 }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Atur Jam Operasional</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-clock text-primary me-2"></i>Atur Jam Operasional
+            </h1>
+        </div>
+        <div>
+            <a href="{% url 'fields:manager_field_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar Lapangan
+            </a>
+        </div>
+    </div>
+    
+    <!-- Field Info Header -->
+    <div class="field-header">
+        {% if field.image %}
+            <img src="{{ field.image.url }}" class="field-image" alt="{{ field.name }}">
+        {% else %}
+            <div class="field-image bg-light d-flex align-items-center justify-content-center">
+                <i class="fas fa-futbol fa-2x text-secondary"></i>
+            </div>
+        {% endif %}
+        <div class="field-info">
+            <h2 class="mb-1">{{ field.name }}</h2>
+            <div class="field-meta">
+                <span><i class="fas fa-tag me-1"></i> {{ field.get_category_display|default:field.category }}</span>
+                <span><i class="fas fa-money-bill-wave me-1"></i> Rp{{ field.price_per_hour|intcomma }}/jam</span>
+                <span>
+                    {% if field.is_active %}
+                        <i class="fas fa-circle text-success me-1"></i> Aktif
+                    {% else %}
+                        <i class="fas fa-circle text-secondary me-1"></i> Nonaktif
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+                <div>{{ message }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Operational Hours Section -->
+    <form id="operationalHoursForm" method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <div class="form-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Jadwal Operasional</h5>
+                <button type="button" id="copyWeekBtn" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-copy me-1"></i> Salin ke Semua Hari
+                </button>
+            </div>
+            
+            {% if formset and formset.forms %}
+                <div class="row g-3">
+                    {% for form in formset %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="day-card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="form-switch mb-0">
+                                    <input class="form-check-input day-toggle" type="checkbox" 
+                                           id="day-toggle-{{ form.day.value }}" 
+                                           name="form-{{ forloop.counter0 }}-is_closed" 
+                                           {% if form.is_closed.value %}checked{% endif %}>
+                                    <label class="form-check-label fw-bold" for="day-toggle-{{ form.day.value }}">
+                                        {{ form.day.value }}
+                                    </label>
+                                </div>
+                                <span class="badge {% if form.is_closed.value %}bg-danger{% else %}bg-success{% endif %} ms-2" id="status-badge-{{ forloop.counter0 }}">
+                                    {% if form.is_closed.value %}Tutup{% else %}Buka{% endif %}
+                                </span>
+                                <input type="hidden" name="form-{{ forloop.counter0 }}-id" value="{{ form.id.value|default:'' }}">
+                                <input type="hidden" name="form-{{ forloop.counter0 }}-day" value="{{ form.day.value }}">
+                            </div>
+                            <div class="card-body day-content {% if form.is_closed.value %}d-none{% endif %}">
+                                <div class="time-slots" id="time-slots-{{ forloop.counter0 }}">
+                                    <div class="time-slot">
+                                        <div class="time-input-wrapper">
+                                            <input type="time" 
+                                                   name="form-{{ forloop.counter0 }}-open_time" 
+                                                   value="{{ form.open_time.value|time:'H:i' }}" 
+                                                   class="form-control form-control-sm time-input" 
+                                                   {% if form.is_closed.value %}disabled{% else %}required{% endif %}>
+                                            <span class="time-input-separator">-</span>
+                                            <input type="time" 
+                                                   name="form-{{ forloop.counter0 }}-close_time" 
+                                                   value="{{ form.close_time.value|time:'H:i' }}" 
+                                                   class="form-control form-control-sm time-input" 
+                                                   {% if form.is_closed.value %}disabled{% else %}required{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-text small text-muted mt-2">
+                                    Atur jam buka dan tutup untuk {{ form.day.value }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <a href="{% url 'fields:field_detail' field.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-1"></i> Simpan Perubahan
+                    </button>
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Belum ada jadwal operasional. Silakan tambahkan jadwal operasional untuk lapangan ini.
+                </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'fields/js/operational_hours.js' %}"></script>
+{% endblock %}

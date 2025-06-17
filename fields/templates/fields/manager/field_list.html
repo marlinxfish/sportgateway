@@ -1,0 +1,212 @@
+{% extends 'manager_dashboard/base_manager.html' %}
+{% load humanize static %}
+
+{% block title %}Kelola Lapangan - SportGateway{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables CSS -->
+
+<style>
+    .field-image {
+        width: 32px;
+        height: 32px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .field-image-placeholder {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        color: #6c757d;
+    }
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.35em 0.65em;
+    }
+    .action-buttons .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        margin: 0 2px;
+    }
+    .dataTables_wrapper {
+        width: 100%;
+        margin: 0 auto;
+    }
+    .dataTables_filter input {
+        margin-left: 0.5em;
+        display: inline-block;
+        width: auto;
+    }
+    .dataTables_length select {
+        display: inline-block;
+        width: auto;
+    }
+    .dataTables_paginate {
+        margin-top: 1em;
+    }
+    .paginate_button {
+        margin: 0 2px;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block manager_content %}
+<!-- Page Header -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-map-marker-alt text-primary me-2"></i>Kelola Lapangan</h1>
+</div>
+
+
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Lapangan List -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-column flex-md-row justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0"><i class="fas fa-list-alt me-1"></i> Detail Lapangan Anda</h6>
+    <div class="d-flex flex-wrap gap-2">
+        
+    </div>
+</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Lapangan</th>
+                        <th>Kategori</th>
+                        <th>Harga/Jam</th>
+                        <th>Status</th>
+                        <th>Dibuat</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if fields and fields.0 %}
+                    {% with field=fields.0 %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    {% if field.image %}
+                                        <img src="{{ field.image.url }}" class="field-image me-2" style="width:32px;height:32px;max-width:32px;max-height:32px;object-fit:cover;display:block;" alt="Lapangan">
+                                    {% else %}
+                                        <div class="field-image-placeholder me-2" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-futbol"></i></div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ field.name }}</div>
+                                    <div class="small text-muted">ID: {{ field.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <span class="badge bg-info text-dark">{{ field.get_category_display|default:field.category }}</span>
+                        </td>
+                        <td class="align-middle">Rp{{ field.price_per_hour|intcomma }}</td>
+                        <td class="align-middle">
+                            {% if field.is_active %}
+                            <span class="badge bg-success status-badge"><i class="fas fa-check-circle"></i> Aktif</span>
+                            {% else %}
+                            <span class="badge bg-danger status-badge"><i class="fas fa-times-circle"></i> Nonaktif</span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">{{ field.created_at|date:"d M Y" }}</td>
+                        <td class="align-middle text-center">
+    <div class="d-flex justify-content-center action-buttons">
+        <a href="{% url 'fields:field_edit' field.pk %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit Lapangan">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'fields:edit_operational_hours' field.pk %}" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Atur Jam Operasional">
+            <i class="fas fa-clock"></i> Jam
+        </a>
+        <a href="{% url 'fields:manage_closures' field.pk %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Tutup Lapangan">
+            <i class="fas fa-calendar-times"></i> Tutup
+        </a>
+    </div>
+</td>
+                    </tr>
+                    {% endwith %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted py-4">
+                                <i class="fas fa-futbol fa-3x mb-3 opacity-50"></i>
+                                <h5 class="mb-3">Belum ada lapangan yang tersedia</h5>
+                                <p class="mb-4">Silakan hubungi administrator untuk menambahkan lapangan baru</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            
+            <!-- Pagination akan ditangani oleh DataTables -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'fields/manager_field_list.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('#dataTable').DataTable({
+        language: {
+            infoFiltered: '(disaring dari total _MAX_ data)',
+            search: 'Cari:',
+            lengthMenu: 'Tampilkan _MENU_ data per halaman',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data'
+        },
+        order: [[4, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: [5] }  // Disable sorting on action column
+        ],
+        // responsive: true,
+        // autoWidth: false,
+        // dom: ...
+        buttons: [
+            {
+                extend: 'excel',
+                className: 'btn btn-sm btn-outline-success',
+                text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4]
+                }
+            },
+            {
+                extend: 'pdf',
+                className: 'btn btn-sm btn-outline-danger',
+                text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4]
+                }
+            },
+            {
+                extend: 'print',
+                className: 'btn btn-sm btn-outline-secondary',
+                text: '<i class="fas fa-print me-1"></i> Cetak',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4]
+                }
+            }
+        ]
+    });
+});
+</script>
+{% endblock %}

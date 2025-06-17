@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-{% if payment.payment_status == 'completed' %}success{% else %}primary{% endif %} text-white">
+                    <h4 class="mb-0">
+                        {% if payment.payment_status == 'completed' %}
+                            ✅ Pembayaran Berhasil
+                        {% else %}
+                            Instruksi Pembayaran
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if 'va_' in payment.payment_method %}
+                        <!-- Tampilan untuk Virtual Account -->
+                        {% with bank_name=payment.get_payment_method_display|slice:"3:" %}
+                        <div class="text-center mb-4">
+                            {% if payment.payment_method == 'va_bca' %}
+                                <img src="{% static 'assets/BCA.png' %}" alt="BCA" class="img-fluid mb-3" style="max-height: 100px; width: auto;">
+                            {% elif payment.payment_method == 'va_mandiri' %}
+                                <img src="{% static 'assets/Mandiri.png' %}" alt="Mandiri" class="img-fluid mb-3" style="max-height: 100px; width: auto;">
+                            {% elif payment.payment_method == 'va_bni' %}
+                                <img src="{% static 'assets/BNI.png' %}" alt="BNI" class="img-fluid mb-3" style="max-height: 100px; width: auto;">
+                            {% else %}
+                                <i class="fas fa-university fa-5x mb-3" style="color: #0d6efd;"></i>
+                            {% endif %}
+                            <h4>{{ bank_name }} Virtual Account</h4>
+                            <p>Nomor Virtual Account</p>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control form-control-lg text-center font-monospace fw-bold" 
+                                       value="{{ payment.virtual_account }}" id="vaNumber" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <p class="text-muted">Salin nomor Virtual Account di atas untuk melakukan pembayaran</p>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <h5>Cara Pembayaran:</h5>
+                            <ol>
+                                <li>Buka aplikasi {{ bank_name }} Mobile atau ATM {{ bank_name }}</li>
+                                <li>Pilih menu <strong>Transfer</strong> > <strong>Ke Rekening {{ bank_name }} Virtual Account</strong></li>
+                                <li>Masukkan nomor Virtual Account: <strong>{{ payment.virtual_account }}</strong></li>
+                                <li>Masukkan jumlah yang harus dibayar: <strong>Rp {{ payment.amount|floatformat:0 }}</strong></li>
+                                <li>Ikuti instruksi untuk menyelesaikan transaksi</li>
+                            </ol>
+                        </div>
+                        {% endwith %}
+                        
+                    {% elif payment.payment_method == 'qris' %}
+                        <!-- Tampilan untuk QRIS -->
+                        <div class="text-center">
+                            <i class="fas fa-qrcode" style="font-size: 4rem; color: #198754;"></i>
+                            <h4 class="mt-3">Pembayaran QRIS</h4>
+                            <p>Scan QR Code di bawah ini untuk melakukan pembayaran</p>
+                            
+                            <div class="d-flex justify-content-center mb-4">
+                                <div class="border p-3">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ payment.code }}" 
+                                         alt="QRIS Payment" class="img-fluid">
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h5>Jumlah Pembayaran:</h5>
+                                <h3 class="text-primary">Rp {{ payment.amount|floatformat:0 }}</h3>
+                                <p class="mb-0">Kode Booking: <strong>{{ payment.code }}</strong></p>
+                            </div>
+                        </div>
+                        
+                    {% else %}
+                        <!-- Tampilan untuk Transfer Bank Manual -->
+                        <div class="text-center mb-4">
+                            <i class="fas fa-university" style="font-size: 4rem; color: #0d6efd;"></i>
+                            <h4 class="mt-3">Transfer Bank {{ payment.get_payment_method_display }}</h4>
+                            <p>Silakan transfer ke rekening berikut:</p>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1">Bank: <strong>{{ payment.get_payment_method_display }}</strong></p>
+                                            <p class="mb-1">Nomor Rekening: <strong>1234 5678 9012</strong></p>
+                                            <p class="mb-1">Atas Nama: <strong>SPORTKU ID</strong></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1">Jumlah Transfer:</p>
+                                            <h4>Rp {{ payment.amount|floatformat:0 }}</h4>
+                                            <p class="text-muted small">Pastikan jumlah transfer sesuai</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <h6 class="alert-heading">Perhatian!</h6>
+                                <ul class="mb-0">
+                                    <li>Pastikan nominal transfer sesuai dengan total pembayaran</li>
+                                    <li>Pembayaran akan diverifikasi otomatis oleh sistem</li>
+                                    <li>Simpan bukti transfer Anda sebagai arsip</li>
+                                </ul>
+                            </div>
+                            
+                            <p class="mb-0">Kode Booking: <strong>{{ payment.booking.code }}</strong></p>
+                        </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <!-- Debug Info -->
+                    <div class="alert alert-secondary d-block">
+                        <p>Payment Status: {{ payment.payment_status }}</p>
+                        <p>Payment Method: {{ payment.payment_method }}</p>
+                        <p>Is VA: {% if 'va_' in payment.payment_method|default:'' %}Ya{% else %}Tidak{% endif %}</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {% if payment.payment_status == 'pending' %}
+                            {% if 'va_' in payment.payment_method %}
+                                <a href="{% url 'payments:confirm' code=payment.code %}" class="btn btn-success mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>Konfirmasi Pembayaran
+                                </a>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Pembayaran Anda akan diverifikasi secara otomatis oleh sistem.
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'booking:my_bookings' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Kembali ke Riwayat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if payment.payment_method == 'va_bca' %}
+<script>
+function copyToClipboard() {
+    var copyText = document.getElementById("vaNumber");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    
+    // Tampilkan notifikasi
+    var tooltip = document.createElement("span");
+    tooltip.innerHTML = "Tersalin!";
+    tooltip.className = "position-absolute top-0 start-100 translate-middle badge bg-success";
+    tooltip.style.zIndex = "1";
+    
+    var button = event.target;
+    button.appendChild(tooltip);
+    
+    // Hapus notifikasi setelah 2 detik
+    setTimeout(function() {
+        button.removeChild(tooltip);
+    }, 2000);
+}
+</script>
+{% endif %}
+
+<style>
+.va-number {
+    font-family: monospace;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+</style>
+{% endblock %}
